@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -31,7 +30,7 @@ public static class Hasher
     {
         byte[] saltBytes1 = Guid.NewGuid().ToByteArray();
         byte[] saltBytes2 = Guid.NewGuid().ToByteArray();
-        salt = ToHexString(saltBytes1) + ToHexString(saltBytes2);
+        salt = saltBytes1.ToHexString(upperCase: true) + saltBytes2.ToHexString(upperCase: true);
         hash = Hash(text, salt);
     }
 
@@ -47,27 +46,8 @@ public static class Hasher
         text ??= string.Empty;
         salt ??= string.Empty;
 
-        byte[] bytes;
+        byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes(text + salt));
 
-        using (HashAlgorithm algorithm = SHA256.Create())
-        {
-            bytes = algorithm.ComputeHash(Encoding.UTF8.GetBytes(text + salt));
-        }
-
-        return ToHexString(bytes);
-    }
-
-    private static string ToHexString(byte[] bytes)
-    {
-        Debug.Assert(bytes != null);
-
-        StringBuilder sb = new(bytes.Length * 2);
-
-        foreach (byte b in bytes)
-        {
-            sb.Append(b.ToString("X2"));
-        }
-
-        return sb.ToString();
+        return bytes.ToHexString(upperCase: true);
     }
 }
